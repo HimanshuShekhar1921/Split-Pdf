@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Prishu Split PDF</title>
+		<style>
+			/* Global Styles */
+			body {
+				font-family: 'Arial', sans-serif;
+				background: #e0e5ec;
+				margin: 0;
+				padding: 0;
+				color: #333;
+			}
+
+			.container {
+				background: #e0e5ec;
+				padding: 2rem;
+				border-radius: 20px;
+				box-shadow: 10px 10px 20px #a3b1c6, -10px -10px 20px #ffffff;
+				max-width: 1200px;
+				width: 90%;
+				margin: 2rem auto;
+				text-align: center;
+			}
+
+			h1,
+			h2,
+			h3 {
+				color: #333;
+			}
+
+			h1 {
+				font-size: 2.5rem;
+				margin-bottom: 1rem;
+			}
+
+			h2 {
+				font-size: 2rem;
+				margin-bottom: 1rem;
+				color: red;
+				/* Topic Color */
+			}
+
+			h3 {
+				font-size: 1.5rem;
+				margin-bottom: 0.5rem;
+				color: green;
+				/* Subtopic Color */
+			}
+
+			p {
+				font-size: 1rem;
+				line-height: 1.5;
+				color: blue;
+				/* Description Color */
+				margin-bottom: 1rem;
+			}
+
+			/* Tool Styles */
+			input[type="file"] {
+				display: none;
+			}
+
+			.upload-label {
+				display: inline-block;
+				padding: 10px 20px;
+				background: #e0e5ec;
+				border-radius: 10px;
+				box-shadow: 5px 5px 10px #a3b1c6, -5px -5px 10px #ffffff;
+				cursor: pointer;
+				color: #333;
+				margin-bottom: 1rem;
+			}
+
+			.upload-label:hover {
+				box-shadow: inset 5px 5px 10px #a3b1c6, inset -5px -5px 10px #ffffff;
+			}
+
+			.progress-bar {
+				width: 100%;
+				height: 10px;
+				background: #e0e5ec;
+				border-radius: 5px;
+				box-shadow: inset 5px 5px 10px #a3b1c6, inset -5px -5px 10px #ffffff;
+				margin-bottom: 1rem;
+				overflow: hidden;
+			}
+
+			.progress {
+				height: 100%;
+				background: #4caf50;
+				width: 0%;
+				transition: width 0.3s ease;
+			}
+
+			.page-preview {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 10px;
+				margin-bottom: 1rem;
+			}
+
+			.page-preview img {
+				border: 2px solid #ddd;
+				border-radius: 10px;
+				cursor: pointer;
+				box-shadow: 5px 5px 10px #a3b1c6, -5px -5px 10px #ffffff;
+			}
+
+			.page-preview img.selected {
+				border-color: #4caf50;
+				box-shadow: 0 0 10px #4caf50;
+			}
+
+			.split-btn,
+			.download-btn,
+			.reset-btn {
+				padding: 10px 20px;
+				background: #e0e5ec;
+				border-radius: 10px;
+				box-shadow: 5px 5px 10px #a3b1c6, -5px -5px 10px #ffffff;
+				cursor: pointer;
+				color: #333;
+				border: none;
+				margin: 0.5rem;
+			}
+
+			.split-btn:hover,
+			.download-btn:hover,
+			.reset-btn:hover {
+				box-shadow: inset 5px 5px 10px #a3b1c6, inset -5px -5px 10px #ffffff;
+			}
+
+			.result-table {
+				width: 100%;
+				border-collapse: collapse;
+				margin-top: 1rem;
+			}
+
+			.result-table th,
+			.result-table td {
+				padding: 10px;
+				border: 1px solid #ddd;
+				text-align: center;
+			}
+
+			.result-table th {
+				background: #e0e5ec;
+				box-shadow: 5px 5px 10px #a3b1c6, -5px -5px 10px #ffffff;
+			}
+
+			.result-table td {
+				background: #e0e5ec;
+				box-shadow: inset 5px 5px 10px #a3b1c6, inset -5px -5px 10px #ffffff;
+			}
+
+			/* Section Styles */
+			.section {
+				background: #e0e5ec;
+				padding: 1.5rem;
+				border-radius: 20px;
+				box-shadow: 10px 10px 20px #a3b1c6, -10px -10px 20px #ffffff;
+				margin-bottom: 2rem;
+				text-align: left;
+			}
+
+			.section h2 {
+				text-align: center;
+			}
+
+			/* FAQ Styles */
+			.faq-item {
+				margin-bottom: 1rem;
+			}
+
+			.faq-item h3 {
+				color: green;
+			}
+
+			.faq-item p {
+				color: blue;
+			}
+
+			/* Responsive Design */
+			@media (max-width: 768px) {
+				h1 {
+					font-size: 2rem;
+				}
+
+				h2 {
+					font-size: 1.75rem;
+				}
+
+				h3 {
+					font-size: 1.25rem;
+				}
+
+				.container {
+					padding: 1rem;
+				}
+
+				.upload-label,
+				.split-btn,
+				.download-btn,
+				.reset-btn {
+					width: 100%;
+					margin: 0.5rem 0;
+				}
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="container">
+			<!-- Split PDF Tool -->
+			<h1>📄 Prishu Split PDF</h1>
+			<label for="pdf-file" class="upload-label">📤 Upload PDF</label>
+			<input type="file" id="pdf-file" accept="application/pdf">
+			<div class="progress-bar">
+				<div class="progress"></div>
+			</div>
+			<div class="page-preview" id="page-preview"></div>
+			<button class="split-btn" onclick="splitPdf()">✂️ Split PDF</button>
+			<table class="result-table">
+				<thead>
+					<tr>
+						<th>Page</th>
+						<th>Status</th>
+					</tr>
+				</thead>
+				<tbody id="result-body"></tbody>
+			</table>
+			<button class="download-btn" onclick="downloadPdf()" style="display: none;">📥 Download Split PDF</button>
+			<button class="reset-btn" onclick="resetApp()">🔄 Split New PDF File</button>
+
+			<!-- Why We Chose It Section -->
+			<div class="section">
+				<h2>Why We Chose It</h2>
+				<h3>Ease of Use</h3>
+				<p>Our Split PDF Tool is designed with simplicity in mind. You don't need any technical skills to use it.</p>
+				<h3>Efficiency</h3>
+				<p>Quickly split large PDF files into smaller, manageable sections without losing quality.</p>
+			</div>
+
+			<!-- How It Works Section -->
+			<div class="section">
+				<h2>How It Works</h2>
+				<h3>Upload PDF</h3>
+				<p>Upload your PDF file using the "Upload PDF" button. The tool will display all pages for preview.</p>
+				<h3>Select Pages</h3>
+				<p>Click on the pages you want to remove. Selected pages will be highlighted.</p>
+				<h3>Split and Download</h3>
+				<p>Click "Split PDF" to remove the selected pages. Download the new PDF with the remaining pages.</p>
+			</div>
+
+			<!-- How to Use Section -->
+			<div class="section">
+				<h2>How to Use</h2>
+				<h3>Step 1: Upload</h3>
+				<p>Click the "Upload PDF" button and select your PDF file.</p>
+				<h3>Step 2: Select Pages</h3>
+				<p>Click on the pages you want to remove from the preview.</p>
+				<h3>Step 3: Split</h3>
+				<p>Click "Split PDF" to process the file. The selected pages will be removed.</p>
+				<h3>Step 4: Download</h3>
+				<p>Click "Download Split PDF" to save the new file to your device.</p>
+			</div>
+
+			<!-- FAQs Section -->
+			<div class="section">
+				<h2>Frequently Asked Questions (FAQs)</h2>
+				<div class="faq-item">
+					<h3>Is this tool free to use?</h3>
+					<p>Yes, our Split PDF Tool is completely free to use.</p>
+				</div>
+				<div class="faq-item">
+					<h3>Can I split multiple PDFs at once?</h3>
+					<p>Currently, the tool supports splitting one PDF file at a time.</p>
+				</div>
+				<div class="faq-item">
+					<h3>Is my data safe?</h3>
+					<p>Yes, your files are processed locally and never uploaded to any server.</p>
+				</div>
+				<div class="faq-item">
+					<h3>What file formats are supported?</h3>
+					<p>Only PDF files are supported at this time.</p>
+				</div>
+			</div>
+		</div>
+
+		<!-- PDF.js Library -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+		<!-- PDF-Lib for creating new PDFs -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+		<script>
+			let pdfFile = null;
+			let pdfDoc = null;
+			let selectedPages = new Set();
+			let splitPdfBlob = null;
+
+			// Upload PDF file
+			document.getElementById('pdf-file').addEventListener('change', function(e) {
+				const file = e.target.files[0];
+				if (file && file.type === 'application/pdf') {
+					pdfFile = file;
+					simulateProgress('.progress', 100, async () => {
+						console.log('PDF uploaded successfully!');
+						await renderPdfPages(file);
+					});
+				} else {
+					alert('Please upload a valid PDF file.');
+				}
+			});
+
+			// Render PDF pages as images
+			async function renderPdfPages(file) {
+				const pdfData = await file.arrayBuffer();
+				pdfDoc = await pdfjsLib.getDocument({
+					data: pdfData
+				}).promise;
+				const pagePreview = document.getElementById('page-preview');
+				pagePreview.innerHTML = '';
+
+				for (let i = 1; i <= pdfDoc.numPages; i++) {
+					const page = await pdfDoc.getPage(i);
+					const viewport = page.getViewport({
+						scale: 0.5
+					});
+					const canvas = document.createElement('canvas');
+					const context = canvas.getContext('2d');
+					canvas.height = viewport.height;
+					canvas.width = viewport.width;
+
+					await page.render({
+						canvasContext: context,
+						viewport
+					}).promise;
+					const img = document.createElement('img');
+					img.src = canvas.toDataURL();
+					img.alt = `Page ${i}`;
+					img.addEventListener('click', () => togglePageSelection(i, img));
+					pagePreview.appendChild(img);
+				}
+			}
+
+			// Toggle page selection
+			function togglePageSelection(pageNumber, img) {
+				if (selectedPages.has(pageNumber)) {
+					selectedPages.delete(pageNumber);
+					img.classList.remove('selected');
+				} else {
+					selectedPages.add(pageNumber);
+					img.classList.add('selected');
+				}
+			}
+
+			// Split PDF function
+			async function splitPdf() {
+				if (!pdfDoc) {
+					alert('Please upload a PDF file first.');
+					return;
+				}
+
+				if (selectedPages.size === 0) {
+					alert('Please select at least one page to split.');
+					return;
+				}
+
+				simulateProgress('.progress', 100, async () => {
+					const resultBody = document.getElementById('result-body');
+					resultBody.innerHTML = '';
+
+					// Create a new PDF with the remaining pages (excluding selected pages)
+					const remainingPages = [];
+					for (let i = 1; i <= pdfDoc.numPages; i++) {
+						if (!selectedPages.has(i)) {
+							remainingPages.push(i);
+						}
+					}
+
+					const pdfBytes = await createSplitPdf(pdfDoc, remainingPages);
+					splitPdfBlob = new Blob([pdfBytes], {
+						type: 'application/pdf'
+					});
+
+					selectedPages.forEach(page => {
+						const row = document.createElement('tr');
+						row.innerHTML = `
+        <td>${page}</td>
+        <td>✅ Removed</td>
+      `;
+						resultBody.appendChild(row);
+					});
+
+					document.querySelector('.download-btn').style.display = 'block';
+				});
+			}
+
+			// Create a new PDF with the remaining pages
+			async function createSplitPdf(pdfDoc, pages) {
+				const {
+					PDFDocument
+				} = PDFLib;
+				const newPdf = await PDFDocument.create();
+				const pdfBytes = await pdfDoc.getData();
+				const originalPdf = await PDFDocument.load(pdfBytes);
+
+				for (const pageNumber of pages) {
+					const [page] = await newPdf.copyPages(originalPdf, [pageNumber - 1]);
+					newPdf.addPage(page);
+				}
+
+				return await newPdf.save();
+			}
+
+			// Download split PDF
+			function downloadPdf() {
+				if (splitPdfBlob) {
+					const url = URL.createObjectURL(splitPdfBlob);
+					const a = document.createElement('a');
+					a.href = url;
+					a.download = 'split-pdf.pdf';
+					a.click();
+					URL.revokeObjectURL(url);
+				} else {
+					alert('No split PDF available to download.');
+				}
+			}
+
+			// Reset the application
+			function resetApp() {
+				pdfFile = null;
+				pdfDoc = null;
+				selectedPages.clear();
+				splitPdfBlob = null;
+				document.getElementById('pdf-file').value = '';
+				document.getElementById('page-preview').innerHTML = '';
+				document.getElementById('result-body').innerHTML = '';
+				document.querySelector('.progress').style.width = '0%';
+				document.querySelector('.download-btn').style.display = 'none';
+			}
+
+			// Simulate progress bar
+			function simulateProgress(selector, duration, callback) {
+				const progressBar = document.querySelector(selector);
+				let width = 0;
+				const interval = setInterval(() => {
+					if (width >= 100) {
+						clearInterval(interval);
+						if (callback) callback();
+					} else {
+						width++;
+						progressBar.style.width = width + '%';
+					}
+				}, duration / 100);
+			}
+		</script>
+	</body>
+
+</html>
